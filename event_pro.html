@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventPro | Event Management Portal</title>
+<style>
+:root{
+  --dark:#222; --dark-2:#2c3e50; --accent:#ff9800; --accent-dark:#e68900;
+  --bg:#f5f7fa; --card:#ffffff; --text-muted:#666; --danger:#e74c3c; --success:#27ae60;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+html,body{height:100%;}
+body{background:var(--bg);color:#222;min-height:100%;display:flex;flex-direction:column;}
+a{color:inherit;cursor:pointer;}
+button{font-family:inherit;}
+
+header{background:var(--dark);padding:15px 50px;position:sticky;top:0;z-index:50;}
+nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.logo{color:#fff;font-size:26px;font-weight:bold;text-decoration:none;}
+.logo span{color:var(--accent);}
+nav ul{display:flex;list-style:none;align-items:center;flex-wrap:wrap;}
+nav ul li{margin-left:22px;}
+nav ul li a{color:#fff;text-decoration:none;font-size:16px;transition:color .2s;}
+nav ul li a:hover{color:var(--accent);}
+nav ul li a.btn-nav{background:var(--accent);padding:8px 18px;border-radius:5px;}
+nav ul li a.btn-nav:hover{background:var(--accent-dark);color:#fff;}
+#navUserBadge{color:var(--accent);font-weight:bold;}
+
+.hero{
+  min-height:60vh;
+  background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+  url('https://images.unsplash.com/photo-1511578314322-379afb476865');
+  background-size:cover;background-position:center;
+  display:flex;justify-content:center;align-items:center;text-align:center;color:#fff;padding:40px 20px;
+}
+.hero-content h1{font-size:48px;margin-bottom:16px;}
+.hero-content p{font-size:19px;margin-bottom:24px;opacity:.95;}
+
+.page-header{background:var(--dark-2);color:#fff;padding:44px 20px;text-align:center;}
+.page-header h1{font-size:32px;margin-bottom:8px;}
+.page-header p{opacity:.85;}
+
+.btn{display:inline-block;background:var(--accent);color:#fff;padding:12px 28px;text-decoration:none;
+  border-radius:6px;border:none;cursor:pointer;font-size:16px;transition:background .2s;}
+.btn:hover{background:var(--accent-dark);}
+.btn-danger{background:var(--danger);}
+.btn-danger:hover{background:#c0392b;}
+.btn-small{padding:8px 16px;font-size:14px;}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+
+main{flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:50px 20px;}
+.container.narrow{max-width:460px;}
+.section-title{text-align:center;margin-bottom:30px;}
+.section-title h2{font-size:28px;margin-bottom:6px;}
+.section-title p{color:var(--text-muted);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;}
+.card{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column;}
+.card img{width:100%;height:160px;object-fit:cover;}
+.card-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.card-body h3{margin-bottom:6px;}
+.card-body .meta{color:var(--text-muted);font-size:14px;margin-bottom:4px;}
+.card-body .price{font-weight:bold;color:var(--accent-dark);margin:8px 0;font-size:17px;}
+.badge{display:inline-block;background:#eef2f7;color:var(--dark-2);font-size:12px;padding:4px 10px;border-radius:20px;margin-bottom:8px;align-self:flex-start;}
+.badge.paid{background:#e8f8ef;color:var(--success);}
+.badge.pending{background:#fff5e6;color:var(--accent-dark);}
+.badge.cancelled{background:#fdecea;color:var(--danger);}
+.spacer{flex:1;}
+
+form.card-form{background:var(--card);max-width:440px;margin:0 auto;padding:32px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+form.card-form h2{margin-bottom:20px;text-align:center;}
+.field{margin-bottom:16px;}
+.field label{display:block;margin-bottom:6px;font-size:14px;color:var(--text-muted);}
+.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:15px;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+.form-row{display:flex;gap:14px;}
+.form-row .field{flex:1;}
+.form-footer{text-align:center;margin-top:14px;font-size:14px;color:var(--text-muted);}
+.form-footer a{color:var(--accent-dark);font-weight:bold;text-decoration:none;}
+
+.alert{padding:11px 15px;border-radius:6px;margin-bottom:16px;font-size:14px;}
+.alert-error{background:#fdecea;color:var(--danger);}
+.alert-success{background:#e8f8ef;color:var(--success);}
+.hidden{display:none !important;}
+
+table{width:100%;border-collapse:collapse;background:var(--card);}
+table th,table td{padding:11px 13px;text-align:left;border-bottom:1px solid #eee;font-size:13.5px;}
+table th{background:var(--dark-2);color:#fff;}
+table tr:last-child td{border-bottom:none;}
+.table-wrap{overflow-x:auto;background:var(--card);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:10px;}
+
+.admin-tabs{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.admin-tab{padding:9px 18px;border-radius:6px;background:#fff;border:1px solid #ddd;cursor:pointer;font-size:14.5px;}
+.admin-tab.active{background:var(--dark-2);color:#fff;border-color:var(--dark-2);}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;margin-bottom:30px;}
+.stat-card{background:var(--card);padding:22px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);text-align:center;}
+.stat-card .num{font-size:28px;font-weight:bold;color:var(--dark-2);}
+.stat-card .label{color:var(--text-muted);font-size:13.5px;margin-top:5px;}
+.admin-panel{display:none;}
+.admin-panel.active{display:block;}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:#fff;border-radius:12px;padding:28px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;}
+.modal-box h2{margin-bottom:18px;}
+.modal-close{float:right;cursor:pointer;font-size:22px;color:var(--text-muted);}
+
+footer{background:var(--dark);color:#ccc;text-align:center;padding:24px 20px;font-size:14px;}
+footer a{color:var(--accent);text-decoration:none;}
+
+.demo-note{background:#fff5e6;color:#7a4a00;font-size:13px;text-align:center;padding:8px 16px;border-bottom:1px solid #ffe0b3;}
+
+@media(max-width:768px){
+  header{padding:15px 20px;}
+  nav{flex-direction:column;align-items:flex-start;}
+  nav ul{margin-top:10px;}
+  nav ul li{margin-left:0;margin-right:16px;margin-bottom:6px;}
+  .hero-content h1{font-size:32px;}
+  .form-row{flex-direction:column;gap:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-note">Live demo — data is saved to your Claude artifact storage, acting as the database. Runs the same flows as the full MySQL version.</div>
+<div id="siteHeader"></div>
+<div id="app"><main class="container"><p>Loading...</p></main></div>
+<div id="siteFooter"></div>
+
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h2 id="modalTitle">Add Event</h2>
+    <form id="eventForm" onsubmit="submitEventForm(event)">
+      <input type="hidden" id="ev_id">
+      <div class="field"><label>Event Name</label><input type="text" id="ev_name" required></div>
+      <div class="field"><label>Description</label><textarea id="ev_description" rows="3"></textarea></div>
+      <div class="form-row">
+        <div class="field"><label>Category</label>
+          <select id="ev_category"><option>Corporate</option><option>Concert</option><option>Wedding</option><option>General</option></select>
+        </div>
+        <div class="field"><label>Price (₹)</label><input type="number" id="ev_price" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Date</label><input type="date" id="ev_date" required></div>
+        <div class="field"><label>Time</label><input type="time" id="ev_time"></div>
+      </div>
+      <div class="field"><label>Location</label><input type="text" id="ev_location" required></div>
+      <div class="field"><label>Capacity (total seats)</label><input type="number" id="ev_capacity" min="1" value="100"></div>
+      <div class="field"><label>Image URL (optional)</label><input type="text" id="ev_image" placeholder="https://..."></div>
+      <div id="modalAlert"></div>
+      <button type="submit" class="btn btn-block">Save Event</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// "DATABASE" LAYER — backed by window.storage (persists across sessions)
+// Mirrors the tables from database/schema.sql in the full MySQL version:
+//   users, events, bookings, payments(embedded in bookings), messages
+// =====================================================================
+const DB_KEYS = { users: "users_all", events: "events_all", bookings: "bookings_all", messages: "messages_all", session: "session" };
+
+async function dbGet(key, fallback) {
+  try {
+    const res = await window.storage.get(key, false);
+    return res ? JSON.parse(res.value) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+async function dbSet(key, value) {
+  await window.storage.set(key, JSON.stringify(value), false);
+}
+async function dbDelete(key) {
+  try { await window.storage.delete(key, false); } catch (e) {}
+}
+
+async function hashPassword(password) {
+  const enc = new TextEncoder().encode("eventpro-salt::" + password);
+  const digest = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function nextId(list) {
+  return list.length ? Math.max(...list.map(x => x.id)) + 1 : 1;
+}
+function genTxnId() {
+  return "TXN" + Date.now() + Math.floor(Math.random() * 100000);
+}
+
+let USERS = [], EVENTS = [], BOOKINGS = [], MESSAGES = [], SESSION = null;
+
+async function loadAllData() {
+  USERS = await dbGet(DB_KEYS.users, null);
+  EVENTS = await dbGet(DB_KEYS.events, null);
+  BOOKINGS = await dbGet(DB_KEYS.bookings, []);
+  MESSAGES = await dbGet(DB_KEYS.messages, []);
+  SESSION = await dbGet(DB_KEYS.session, null);
+
+  let needsSeed = false;
+
+  if (!USERS) {
+    const adminHash = await hashPassword("Admin@123");
+    USERS = [{ id: 1, name: "Admin", email: "admin@eventpro.com", passwordHash: adminHash, role: "admin", createdAt: new Date().toISOString() }];
+    needsSeed = true;
+  }
+
+  if (!EVENTS) {
+    EVENTS = [
+      { id: 1, name: "Tech Conference 2026", description: "A full day of talks on AI, cloud and the future of software.", category: "Corporate", date: "2026-09-20", time: "10:00", location: "Delhi", price: 1499, capacity: 200, seatsBooked: 0, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87" },
+      { id: 2, name: "Music Festival", description: "Live performances from top artists across genres.", category: "Concert", date: "2026-10-15", time: "17:00", location: "Mumbai", price: 999, capacity: 500, seatsBooked: 0, image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" },
+      { id: 3, name: "Wedding Expo", description: "Meet vendors for venues, catering, decor and photography.", category: "Wedding", date: "2026-11-10", time: "11:00", location: "Jaipur", price: 199, capacity: 300, seatsBooked: 0, image: "https://images.unsplash.com/photo-1519741497674-611481863552" },
+      { id: 4, name: "Startup Networking Night", description: "Connect with founders, investors and mentors.", category: "Corporate", date: "2026-09-05", time: "18:30", location: "Bengaluru", price: 499, capacity: 120, seatsBooked: 0, image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b" },
+    ];
+    needsSeed = true;
+  }
+
+  if (needsSeed) {
+    await dbSet(DB_KEYS.users, USERS);
+    await dbSet(DB_KEYS.events, EVENTS);
+  }
+}
+
+function currentUser() {
+  if (!SESSION) return null;
+  return USERS.find(u => u.email === SESSION.email) || null;
+}
+
+// =====================================================================
+// ROUTER
+// =====================================================================
+function go(hash) { window.location.hash = hash; }
+window.addEventListener("hashchange", render);
+
+async function boot() {
+  await loadAllData();
+  render();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : String(str);
+  return div.innerHTML;
+}
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+}
+function formatDateTime(iso) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  return d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+function money(n) { return "₹" + Number(n).toFixed(2); }
+
+// =====================================================================
+// HEADER / FOOTER
+// =====================================================================
+function renderHeader() {
+  const user = currentUser();
+  let rightLinks = "";
+  if (user) {
+    rightLinks += `<li><a onclick="go('#/my-bookings')">My Bookings</a></li>`;
+    if (user.role === "admin") rightLinks += `<li><a onclick="go('#/admin')">Admin</a></li>`;
+    rightLinks += `<li><span id="navUserBadge">Hi, ${escapeHtml(user.name.split(" ")[0])}</span></li>`;
+    rightLinks += `<li><a onclick="logout()">Logout</a></li>`;
+  } else {
+    rightLinks += `<li><a onclick="go('#/login')">Login</a></li>`;
+    rightLinks += `<li><a onclick="go('#/register')" class="btn-nav">Register</a></li>`;
+  }
+  document.getElementById("siteHeader").innerHTML = `
+    <header><nav>
+      <a onclick="go('#/')" class="logo">Event<span>Pro</span></a>
+      <ul>
+        <li><a onclick="go('#/')">Home</a></li>
+        <li><a onclick="go('#/events')">Events</a></li>
+        <li><a onclick="go('#/contact')">Contact</a></li>
+        ${rightLinks}
+      </ul>
+    </nav></header>`;
+}
+function renderFooter() {
+  document.getElementById("siteFooter").innerHTML =
+    `<footer><p>&copy; ${new Date().getFullYear()} EventPro | Event Management Portal | All Rights Reserved</p></footer>`;
+}
+
+async function logout() {
+  SESSION = null;
+  await dbDelete(DB_KEYS.session);
+  go("#/");
+  render();
+}
+
+// =====================================================================
+// VIEWS
+// =====================================================================
+function eventCard(ev, opts = {}) {
+  const seatsLeft = ev.capacity - ev.seatsBooked;
+  const soldOut = seatsLeft <= 0;
+  return `
+    <div class="card">
+      ${ev.image ? `<img src="${ev.image}" alt="${escapeHtml(ev.name)}">` : ""}
+      <div class="card-body">
+        <span class="badge">${escapeHtml(ev.category)}</span>
+        <h3>${escapeHtml(ev.name)}</h3>
+        <p class="meta">${formatDate(ev.date)}${ev.time ? " · " + ev.time : ""}</p>
+        <p class="meta">${escapeHtml(ev.location)}</p>
+        ${opts.showSeats ? `<p class="meta">${soldOut ? "Sold out" : seatsLeft + " seats left"}</p>` : ""}
+        <p class="price">${ev.price > 0 ? money(ev.price) : "Free"}</p>
+        <div class="spacer"></div>
+        ${soldOut
+          ? `<button class="btn btn-block" disabled>Sold Out</button>`
+          : `<a onclick="go('#/booking/${ev.id}')" class="btn btn-block">View &amp; Book</a>`}
+      </div>
+    </div>`;
+}
+
+function viewHome() {
+  const upcoming = [...EVENTS].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+  return `
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Plan Your Dream Event</h1>
+        <p>Weddings, Corporate Events, Birthday Parties &amp; More</p>
+        <a onclick="go('#/events')" class="btn">Browse Events</a>
+      </div>
+    </section>
+    <section class="container">
+      <div class="section-title"><h2>Event Categories</h2><p>Whatever the occasion, we've got you covered</p></div>
+      <div class="grid">
+        <div class="card"><div class="card-body"><h3>Wedding Events</h3><p>Beautiful wedding planning and decoration services.</p></div></div>
+        <div class="card"><div class="card-body"><h3>Corporate Events</h3><p>Professional meetings, conferences and seminars.</p></div></div>
+        <div class="card"><div class="card-body"><h3>Birthday Parties</h3><p>Memorable birthday celebrations for all ages.</p></div></div>
+        <div class="card"><div class="card-body"><h3>Concerts</h3><p>Music shows and entertainment events.</p></div></div>
+      </div>
+    </section>
+    <section style="background:#eef2f7;">
+      <div class="container">
+        <div class="section-title"><h2>Upcoming Events</h2><p>Grab your seat before they're gone</p></div>
+        <div class="grid">${upcoming.length ? upcoming.map(ev => eventCard(ev)).join("") : "<p>No events yet.</p>"}</div>
+        <div style="text-align:center;margin-top:26px;"><a onclick="go('#/events')" class="btn">View All Events</a></div>
+      </div>
+    </section>
+    <section class="container">
+      <div class="section-title"><h2>Our Services</h2></div>
+      <div class="grid">
+        <div class="card"><div class="card-body" style="background:#222;color:#fff;text-align:center;">Venue Booking</div></div>
+        <div class="card"><div class="card-body" style="background:#222;color:#fff;text-align:center;">Catering</div></div>
+        <div class="card"><div class="card-body" style="background:#222;color:#fff;text-align:center;">Photography</div></div>
+        <div class="card"><div class="card-body" style="background:#222;color:#fff;text-align:center;">Decoration</div></div>
+      </div>
+    </section>`;
+}
+
+let eventsFilterCategory = "";
+function viewEvents() {
+  const filtered = eventsFilterCategory ? EVENTS.filter(e => e.category === eventsFilterCategory) : EVENTS;
+  const sorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
+  return `
+    <section class="page-header"><h1>Available Events</h1><p>Find and book your next event</p></section>
+    <section class="container">
+      <div class="field" style="max-width:250px;margin:0 auto 26px;">
+        <label>Filter by category</label>
+        <select onchange="eventsFilterCategory=this.value; render();">
+          <option value="" ${eventsFilterCategory === "" ? "selected" : ""}>All Categories</option>
+          <option ${eventsFilterCategory === "Corporate" ? "selected" : ""}>Corporate</option>
+          <option ${eventsFilterCategory === "Concert" ? "selected" : ""}>Concert</option>
+          <option ${eventsFilterCategory === "Wedding" ? "selected" : ""}>Wedding</option>
+          <option ${eventsFilterCategory === "General" ? "selected" : ""}>General</option>
+        </select>
+      </div>
+      <div class="grid">${sorted.length ? sorted.map(ev => eventCard(ev, { showSeats: true })).join("") : "<p>No events found for this category.</p>"}</div>
+    </section>`;
+}
+
+function viewLogin() {
+  return `
+    <section class="container narrow">
+      <form class="card-form" onsubmit="submitLogin(event)">
+        <h2>Login to Your Account</h2>
+        <div id="formAlert"></div>
+        <div class="field"><label>Email</label><input type="email" id="login_email" required></div>
+        <div class="field"><label>Password</label><input type="password" id="login_password" required></div>
+        <button type="submit" class="btn btn-block">Login</button>
+        <p class="form-footer">Don't have an account? <a onclick="go('#/register')">Register here</a></p>
+        <p class="form-footer" style="margin-top:6px;">Admin demo: admin@eventpro.com / Admin@123</p>
+      </form>
+    </section>`;
+}
+
+function viewRegister() {
+  return `
+    <section class="container narrow">
+      <form class="card-form" onsubmit="submitRegister(event)">
+        <h2>Create Your Account</h2>
+        <div id="formAlert"></div>
+        <div class="field"><label>Full Name</label><input type="text" id="reg_name" required></div>
+        <div class="field"><label>Email</label><input type="email" id="reg_email" required></div>
+        <div class="field"><label>Password</label><input type="password" id="reg_password" minlength="6" required>
+          <small style="color:#888;">At least 6 characters</small></div>
+        <button type="submit" class="btn btn-block">Register</button>
+        <p class="form-footer">Already have an account? <a onclick="go('#/login')">Login here</a></p>
+      </form>
+    </section>`;
+}
+
+function viewContact() {
+  return `
+    <section class="page-header"><h1>Contact Us</h1><p>Have a question? We'd love to hear from you.</p></section>
+    <section class="container narrow">
+      <form class="card-form" onsubmit="submitContact(event)">
+        <h2>Send a Message</h2>
+        <div id="formAlert"></div>
+        <div class="field"><label>Your Name</label><input type="text" id="contact_name" required></div>
+        <div class="field"><label>Your Email</label><input type="email" id="contact_email" required></div>
+        <div class="field"><label>Message</label><textarea id="contact_message" rows="5" required></textarea></div>
+        <button type="submit" class="btn btn-block">Send Message</button>
+      </form>
+    </section>`;
+}
+
+function viewBooking(id) {
+  const user = currentUser();
+  const ev = EVENTS.find(e => e.id === id);
+
+  if (!user) {
+    return `
+      <section class="container narrow" style="text-align:center;">
+        <div class="alert alert-error">You need to be logged in to book an event.</div>
+        <a onclick="go('#/login')" class="btn">Login to Continue</a>
+      </section>`;
+  }
+  if (!ev) {
+    return `<section class="container narrow"><p>Event not found.</p></section>`;
+  }
+
+  const seatsLeft = ev.capacity - ev.seatsBooked;
+  return `
+    <section class="page-header"><h1>Book Your Spot</h1><p>Secure your seats in a few clicks</p></section>
+    <section class="container narrow">
+      <div class="card" style="margin-bottom:22px;">
+        <div class="card-body">
+          <span class="badge">${escapeHtml(ev.category)}</span>
+          <h3>${escapeHtml(ev.name)}</h3>
+          <p class="meta">${formatDate(ev.date)}${ev.time ? " · " + ev.time : ""}</p>
+          <p class="meta">${escapeHtml(ev.location)}</p>
+          <p class="meta">${seatsLeft} seat(s) left</p>
+          <p class="price">${ev.price > 0 ? money(ev.price) + " / seat" : "Free"}</p>
+        </div>
+      </div>
+      <form class="card-form" onsubmit="submitBooking(event, ${ev.id})">
+        <h2>Booking Details</h2>
+        <div id="formAlert"></div>
+        <div class="field"><label>Number of Seats</label>
+          <input type="number" id="book_seats" min="1" max="${seatsLeft || 1}" value="1" oninput="updateBookingTotal(${ev.id})"></div>
+        <div class="field"><label>Total Amount</label><input type="text" id="book_total" readonly></div>
+        <hr style="border:none;border-top:1px solid #eee;margin:18px 0;">
+        <h3 style="margin-bottom:12px;">Payment (Mock Gateway — No real charge)</h3>
+        <div class="field"><label>Payment Method</label>
+          <select id="book_method" onchange="document.getElementById('cardFields').classList.toggle('hidden', this.value!=='card')">
+            <option value="card">Credit / Debit Card</option>
+            <option value="upi">UPI</option>
+            <option value="netbanking">Net Banking</option>
+          </select>
+        </div>
+        <div id="cardFields">
+          <div class="field"><label>Name on Card</label><input type="text" id="book_cardname" placeholder="As shown on card"></div>
+          <div class="form-row">
+            <div class="field"><label>Card Number</label><input type="text" id="book_cardnum" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+            <div class="field"><label>Expiry</label><input type="text" id="book_expiry" placeholder="MM/YY" maxlength="5"></div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-block" id="payBtn" ${seatsLeft <= 0 ? "disabled" : ""}>${seatsLeft <= 0 ? "Sold Out" : "Pay & Confirm Booking"}</button>
+      </form>
+    </section>`;
+}
+
+function viewBookingSuccess(data) {
+  return `
+    <section class="container narrow" style="text-align:center;">
+      <div class="alert alert-success">
+        Payment successful! Booking #${data.bookingId} confirmed.<br>
+        Transaction ID: ${data.transactionId}<br>
+        Amount paid: ${money(data.total)}
+      </div>
+      <a onclick="go('#/my-bookings')" class="btn">View My Bookings</a>
+    </section>`;
+}
+
+function viewMyBookings() {
+  const user = currentUser();
+  if (!user) {
+    return `
+      <section class="page-header"><h1>My Bookings</h1><p>Everything you've booked, in one place</p></section>
+      <section class="container narrow" style="text-align:center;">
+        <div class="alert alert-error">You need to be logged in to view your bookings.</div>
+        <a onclick="go('#/login')" class="btn">Login</a>
+      </section>`;
+  }
+
+  const mine = BOOKINGS.filter(b => b.userEmail === user.email).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const cards = mine.map(b => {
+    const ev = EVENTS.find(e => e.id === b.eventId) || {};
+    const badgeClass = b.status === "cancelled" ? "cancelled" : (b.paymentStatus === "paid" ? "paid" : "pending");
+    const badgeText = b.status === "cancelled" ? "Cancelled" : (b.paymentStatus === "paid" ? "Paid" : "Pending");
+    return `
+      <div class="card">
+        ${ev.image ? `<img src="${ev.image}" alt="${escapeHtml(ev.name || "")}">` : ""}
+        <div class="card-body">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <h3>${escapeHtml(ev.name || "Event removed")}</h3>
+          <p class="meta">${ev.date ? formatDate(ev.date) : ""}${ev.time ? " · " + ev.time : ""}</p>
+          <p class="meta">${escapeHtml(ev.location || "")}</p>
+          <p class="meta">${b.seats} seat(s)</p>
+          <p class="price">${money(b.totalAmount)}</p>
+          <div class="spacer"></div>
+          ${b.status !== "cancelled" ? `<button class="btn btn-danger btn-block" onclick="cancelBooking(${b.id})">Cancel Booking</button>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  return `
+    <section class="page-header"><h1>My Bookings</h1><p>Everything you've booked, in one place</p></section>
+    <section class="container">
+      <div class="grid">${mine.length ? cards : `<p>You haven't booked any events yet. <a onclick="go('#/events')">Browse events</a>.</p>`}</div>
+    </section>`;
+}
+
+// ---- Admin ----
+let adminTab = "events";
+function viewAdmin() {
+  const user = currentUser();
+  if (!user || user.role !== "admin") {
+    return `
+      <section class="page-header"><h1>Admin Dashboard</h1><p>Manage events, bookings, users and messages</p></section>
+      <section class="container narrow" style="text-align:center;">
+        <div class="alert alert-error">Admin access only. Please log in with an admin account.</div>
+        <a onclick="go('#/login')" class="btn">Login</a>
+      </section>`;
+  }
+
+  const totalUsers = USERS.filter(u => u.role === "user").length;
+  const totalEvents = EVENTS.length;
+  const confirmed = BOOKINGS.filter(b => b.status === "confirmed");
+  const totalBookings = confirmed.length;
+  const totalRevenue = confirmed.filter(b => b.paymentStatus === "paid").reduce((sum, b) => sum + Number(b.totalAmount), 0);
+
+  const eventsRows = EVENTS.map(ev => `
+    <tr>
+      <td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.category)}</td><td>${formatDate(ev.date)}</td>
+      <td>${escapeHtml(ev.location)}</td><td>${ev.price > 0 ? money(ev.price) : "Free"}</td>
+      <td>${ev.seatsBooked}/${ev.capacity}</td>
+      <td>
+        <button class="btn btn-small" onclick="openEditEvent(${ev.id})">Edit</button>
+        <button class="btn btn-small btn-danger" onclick="deleteEvent(${ev.id})">Delete</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="7">No events yet.</td></tr>`;
+
+  const bookingsRows = [...BOOKINGS].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(b => {
+    const u = USERS.find(x => x.email === b.userEmail) || {};
+    const ev = EVENTS.find(e => e.id === b.eventId) || {};
+    return `<tr>
+      <td>${b.id}</td><td>${escapeHtml(u.name || b.userEmail)}<br><small>${escapeHtml(b.userEmail)}</small></td>
+      <td>${escapeHtml(ev.name || "—")}</td><td>${b.seats}</td><td>${money(b.totalAmount)}</td>
+      <td><span class="badge ${b.paymentStatus === "paid" ? "paid" : "pending"}">${b.paymentStatus}</span></td>
+      <td><span class="badge ${b.status === "cancelled" ? "cancelled" : "paid"}">${b.status}</span></td>
+      <td>${formatDateTime(b.createdAt)}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="8">No bookings yet.</td></tr>`;
+
+  const usersRows = USERS.map(u => `
+    <tr><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.email)}</td><td>${u.role}</td><td>${formatDateTime(u.createdAt)}</td></tr>
+  `).join("") || `<tr><td colspan="4">No users yet.</td></tr>`;
+
+  const messagesRows = [...MESSAGES].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(m => `
+    <tr><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.email)}</td><td>${escapeHtml(m.message)}</td><td>${formatDateTime(m.createdAt)}</td></tr>
+  `).join("") || `<tr><td colspan="4">No messages yet.</td></tr>`;
+
+  return `
+    <section class="page-header"><h1>Admin Dashboard</h1><p>Manage events, bookings, users and messages</p></section>
+    <section class="container" style="max-width:1200px;">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num">${totalEvents}</div><div class="label">Total Events</div></div>
+        <div class="stat-card"><div class="num">${totalUsers}</div><div class="label">Registered Users</div></div>
+        <div class="stat-card"><div class="num">${totalBookings}</div><div class="label">Confirmed Bookings</div></div>
+        <div class="stat-card"><div class="num">${money(totalRevenue)}</div><div class="label">Total Revenue</div></div>
+      </div>
+
+      <div class="admin-tabs">
+        <div class="admin-tab ${adminTab === "events" ? "active" : ""}" onclick="adminTab='events'; render();">Events</div>
+        <div class="admin-tab ${adminTab === "bookings" ? "active" : ""}" onclick="adminTab='bookings'; render();">Bookings</div>
+        <div class="admin-tab ${adminTab === "users" ? "active" : ""}" onclick="adminTab='users'; render();">Users</div>
+        <div class="admin-tab ${adminTab === "messages" ? "active" : ""}" onclick="adminTab='messages'; render();">Messages</div>
+      </div>
+
+      <div class="admin-panel ${adminTab === "events" ? "active" : ""}">
+        <div class="panel-header"><h2>Manage Events</h2><button class="btn" onclick="openNewEvent()">+ Add Event</button></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Category</th><th>Date</th><th>Location</th><th>Price</th><th>Seats</th><th>Actions</th></tr></thead>
+          <tbody>${eventsRows}</tbody>
+        </table></div>
+      </div>
+
+      <div class="admin-panel ${adminTab === "bookings" ? "active" : ""}">
+        <div class="panel-header"><h2>All Bookings</h2></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>User</th><th>Event</th><th>Seats</th><th>Amount</th><th>Payment</th><th>Status</th><th>Booked On</th></tr></thead>
+          <tbody>${bookingsRows}</tbody>
+        </table></div>
+      </div>
+
+      <div class="admin-panel ${adminTab === "users" ? "active" : ""}">
+        <div class="panel-header"><h2>Registered Users</h2></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody>${usersRows}</tbody>
+        </table></div>
+      </div>
+
+      <div class="admin-panel ${adminTab === "messages" ? "active" : ""}">
+        <div class="panel-header"><h2>Contact Messages</h2></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Received</th></tr></thead>
+          <tbody>${messagesRows}</tbody>
+        </table></div>
+      </div>
+    </section>`;
+}
+
+// =====================================================================
+// RENDER / ROUTE DISPATCH
+// =====================================================================
+let lastBookingResult = null;
+
+function render() {
+  renderHeader();
+  renderFooter();
+  const hash = window.location.hash || "#/";
+  const app = document.getElementById("app");
+  let html = "";
+
+  if (hash === "#/" || hash === "") html = viewHome();
+  else if (hash === "#/events") html = viewEvents();
+  else if (hash === "#/login") html = viewLogin();
+  else if (hash === "#/register") html = viewRegister();
+  else if (hash === "#/contact") html = viewContact();
+  else if (hash === "#/my-bookings") html = viewMyBookings();
+  else if (hash === "#/admin") html = viewAdmin();
+  else if (hash.startsWith("#/booking/")) {
+    const id = parseInt(hash.split("/")[2], 10);
+    if (hash.endsWith("/success") || (lastBookingResult && lastBookingResult.eventId === id)) {
+      // handled via explicit success screen below
+    }
+    html = viewBooking(id);
+  } else if (hash === "#/booking-success") {
+    html = lastBookingResult ? viewBookingSuccess(lastBookingResult) : viewHome();
+  } else {
+    html = `<section class="container"><p>Page not found. <a onclick="go('#/')">Go home</a></p></section>`;
+  }
+
+  app.innerHTML = `<main>${html}</main>`;
+
+  const ev = hash.startsWith("#/booking/") ? EVENTS.find(e => e.id === parseInt(hash.split("/")[2], 10)) : null;
+  if (ev) updateBookingTotal(ev.id);
+}
+
+function updateBookingTotal(eventId) {
+  const seatsInput = document.getElementById("book_seats");
+  const totalInput = document.getElementById("book_total");
+  if (!seatsInput || !totalInput) return;
+  const ev = EVENTS.find(e => e.id === eventId);
+  const seats = parseInt(seatsInput.value, 10) || 0;
+  totalInput.value = money((ev ? ev.price : 0) * seats);
+}
+
+function showFormAlert(message, type) {
+  const box = document.getElementById("formAlert");
+  if (box) box.innerHTML = `<div class="alert alert-${type === "success" ? "success" : "error"}">${escapeHtml(message)}</div>`;
+}
+
+// =====================================================================
+// ACTIONS
+// =====================================================================
+async function submitLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById("login_email").value.trim().toLowerCase();
+  const password = document.getElementById("login_password").value;
+
+  const user = USERS.find(u => u.email === email);
+  if (!user) return showFormAlert("Invalid email or password.");
+
+  const hash = await hashPassword(password);
+  if (hash !== user.passwordHash) return showFormAlert("Invalid email or password.");
+
+  SESSION = { email: user.email };
+  await dbSet(DB_KEYS.session, SESSION);
+  go("#/");
+  render();
+}
+
+async function submitRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById("reg_name").value.trim();
+  const email = document.getElementById("reg_email").value.trim().toLowerCase();
+  const password = document.getElementById("reg_password").value;
+
+  if (password.length < 6) return showFormAlert("Password must be at least 6 characters.");
+  if (USERS.find(u => u.email === email)) return showFormAlert("An account with this email already exists.");
+
+  const passwordHash = await hashPassword(password);
+  const user = { id: nextId(USERS), name, email, passwordHash, role: "user", createdAt: new Date().toISOString() };
+  USERS.push(user);
+  await dbSet(DB_KEYS.users, USERS);
+
+  SESSION = { email: user.email };
+  await dbSet(DB_KEYS.session, SESSION);
+  go("#/");
+  render();
+}
+
+async function submitContact(e) {
+  e.preventDefault();
+  const name = document.getElementById("contact_name").value.trim();
+  const email = document.getElementById("contact_email").value.trim();
+  const message = document.getElementById("contact_message").value.trim();
+
+  MESSAGES.push({ id: nextId(MESSAGES), name, email, message, createdAt: new Date().toISOString() });
+  await dbSet(DB_KEYS.messages, MESSAGES);
+  showFormAlert("Thanks! Your message has been sent.", "success");
+  document.querySelector("form").reset();
+}
+
+async function submitBooking(e, eventId) {
+  e.preventDefault();
+  const user = currentUser();
+  if (!user) return go("#/login");
+
+  const ev = EVENTS.find(x => x.id === eventId);
+  if (!ev) return showFormAlert("Event not found.");
+
+  const seats = parseInt(document.getElementById("book_seats").value, 10) || 0;
+  const seatsLeft = ev.capacity - ev.seatsBooked;
+  if (seats < 1) return showFormAlert("Please enter a valid seat count.");
+  if (seats > seatsLeft) return showFormAlert(`Only ${seatsLeft} seat(s) left for this event.`);
+
+  const payBtn = document.getElementById("payBtn");
+  payBtn.disabled = true;
+  payBtn.textContent = "Processing payment...";
+  await new Promise(r => setTimeout(r, 500)); // brief pause so the "processing" state is visible
+
+  const method = document.getElementById("book_method").value;
+  const totalAmount = Number(ev.price) * seats;
+
+  // --- MOCK PAYMENT GATEWAY: no real money moves ---
+  const transactionId = genTxnId();
+  const booking = {
+    id: nextId(BOOKINGS),
+    userEmail: user.email,
+    eventId: ev.id,
+    seats,
+    totalAmount,
+    status: "confirmed",
+    paymentStatus: "paid",
+    method,
+    transactionId,
+    createdAt: new Date().toISOString(),
+  };
+  BOOKINGS.push(booking);
+  ev.seatsBooked += seats;
+
+  await dbSet(DB_KEYS.bookings, BOOKINGS);
+  await dbSet(DB_KEYS.events, EVENTS);
+
+  lastBookingResult = { bookingId: booking.id, transactionId, total: totalAmount, eventId: ev.id };
+  go("#/booking-success");
+  render();
+}
+
+async function cancelBooking(id) {
+  if (!confirm("Cancel this booking?")) return;
+  const booking = BOOKINGS.find(b => b.id === id);
+  if (!booking || booking.status === "cancelled") return;
+
+  booking.status = "cancelled";
+  const ev = EVENTS.find(e => e.id === booking.eventId);
+  if (ev) ev.seatsBooked = Math.max(0, ev.seatsBooked - booking.seats);
+
+  await dbSet(DB_KEYS.bookings, BOOKINGS);
+  await dbSet(DB_KEYS.events, EVENTS);
+  render();
+}
+
+// ---- Admin: event CRUD ----
+function openNewEvent() {
+  document.getElementById("eventForm").reset();
+  document.getElementById("ev_id").value = "";
+  document.getElementById("modalTitle").textContent = "Add Event";
+  document.getElementById("modalAlert").innerHTML = "";
+  document.getElementById("eventModal").classList.add("active");
+}
+function openEditEvent(id) {
+  const ev = EVENTS.find(e => e.id === id);
+  if (!ev) return;
+  document.getElementById("ev_id").value = ev.id;
+  document.getElementById("ev_name").value = ev.name;
+  document.getElementById("ev_description").value = ev.description || "";
+  document.getElementById("ev_category").value = ev.category;
+  document.getElementById("ev_price").value = ev.price;
+  document.getElementById("ev_date").value = ev.date;
+  document.getElementById("ev_time").value = ev.time || "";
+  document.getElementById("ev_location").value = ev.location;
+  document.getElementById("ev_capacity").value = ev.capacity;
+  document.getElementById("ev_image").value = ev.image || "";
+  document.getElementById("modalTitle").textContent = "Edit Event";
+  document.getElementById("modalAlert").innerHTML = "";
+  document.getElementById("eventModal").classList.add("active");
+}
+function closeModal() {
+  document.getElementById("eventModal").classList.remove("active");
+}
+
+async function submitEventForm(e) {
+  e.preventDefault();
+  const id = document.getElementById("ev_id").value;
+  const capacity = parseInt(document.getElementById("ev_capacity").value, 10) || 100;
+
+  const data = {
+    name: document.getElementById("ev_name").value.trim(),
+    description: document.getElementById("ev_description").value.trim(),
+    category: document.getElementById("ev_category").value,
+    price: parseFloat(document.getElementById("ev_price").value) || 0,
+    date: document.getElementById("ev_date").value,
+    time: document.getElementById("ev_time").value || "",
+    location: document.getElementById("ev_location").value.trim(),
+    capacity,
+    image: document.getElementById("ev_image").value.trim(),
+  };
+
+  if (id) {
+    const ev = EVENTS.find(x => x.id === parseInt(id, 10));
+    if (ev) {
+      Object.assign(ev, data);
+      if (ev.seatsBooked > ev.capacity) ev.seatsBooked = ev.capacity;
+    }
+  } else {
+    EVENTS.push({ id: nextId(EVENTS), seatsBooked: 0, ...data });
+  }
+
+  await dbSet(DB_KEYS.events, EVENTS);
+  closeModal();
+  render();
+}
+
+async function deleteEvent(id) {
+  if (!confirm("Delete this event? This cannot be undone.")) return;
+  EVENTS = EVENTS.filter(e => e.id !== id);
+  BOOKINGS = BOOKINGS.filter(b => b.eventId !== id); // clean up related bookings, like ON DELETE CASCADE
+  await dbSet(DB_KEYS.events, EVENTS);
+  await dbSet(DB_KEYS.bookings, BOOKINGS);
+  render();
+}
+
+boot();
+</script>
+</body>
+</html>

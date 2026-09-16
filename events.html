@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Events</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Available Events</h1>
+
+<div id="eventContainer"></div>
+
+<script>
+
+fetch('/events')
+.then(res => res.json())
+.then(data => {
+
+let output='';
+
+data.forEach(event=>{
+
+output += `
+<div class="card">
+<h3>${event.name}</h3>
+<p>${event.date}</p>
+<p>${event.location}</p>
+
+<a href="booking.html">
+<button>Book Now</button>
+</a>
+
+</div>
+`;
+
+});
+
+document.getElementById("eventContainer")
+.innerHTML = output;
+
+});
+
+</script>
+
+</body>
+</html>
